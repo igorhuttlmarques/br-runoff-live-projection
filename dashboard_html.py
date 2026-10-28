@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Builds dashboard.html from historico.csv and ultimo_snapshot.csv (written by projection_r2.py).
 Usage (another terminal, same folder):  python dashboard_html.py --A "Name A" --B "Name B"
+To rebuild it from another folder (e.g. the recorded election night): add --dir data/election_night_2026-10-25
 Then open dashboard.html in the browser; the page reloads itself."""
 import argparse, json, re, time
 from pathlib import Path
@@ -120,11 +121,12 @@ def swing_uf(s, ufs, min_mun=3, min_votes=5000):
         out.append(dict(uf=uf, swing=sw, n=n, votes=v, ok=bool(n >= min_mun and v >= min_votes)))
     return out
 
-def build(A, B, refresh, cen=None):
-    if not Path("historico.csv").exists() or not Path("ultimo_snapshot.csv").exists():
+def build(A, B, refresh, cen=None, data_dir="."):
+    d = Path(data_dir)
+    if not (d / "historico.csv").exists() or not (d / "ultimo_snapshot.csv").exists():
         _write(WAIT.replace("__R__", str(refresh)).replace("__MSG__", "(0 cycles recorded)"))
         return
-    h = pd.read_csv("historico.csv")
+    h = pd.read_csv(d / "historico.csv")
     n_all = len(h)
     if "status" in h: h = h[h.status.astype(str).str.lower() != "inconsistente"]
     h = h[pd.to_numeric(h.point, errors="coerce").notna()].copy() if "point" in h else h.iloc[0:0]
@@ -133,7 +135,7 @@ def build(A, B, refresh, cen=None):
         return
     for c in ["point", "lo", "hi", "cnt", "pA", "apurado", "tau", "n_fit"]:
         if c in h: h[c] = pd.to_numeric(h[c], errors="coerce")
-    s = pd.read_csv("ultimo_snapshot.csv")
+    s = pd.read_csv(d / "ultimo_snapshot.csv")
     s["valid2"] = s.A2 + s.B2
     s["Ap"] = s.R * s.p_hat
     g = s.groupby("uf").agg(A2=("A2", "sum"), v2=("valid2", "sum"), Vhat=("Vhat", "sum"),
@@ -162,13 +164,14 @@ if __name__ == "__main__":
     ap.add_argument("--every", type=int, default=30, help="seconds between rebuilds (also the page refresh interval)")
     ap.add_argument("--once", action="store_true", help="build once and exit")
     ap.add_argument("--cen", default="", help="R1 scenario band for A, e.g. 0.478,0.497")
+    ap.add_argument("--dir", default=".", help="folder with historico.csv and ultimo_snapshot.csv (br_uf_svg.json is still read from the current directory)")
     a = ap.parse_args()
     while True:
         try:
             cen = [float(x) for x in a.cen.split(",")] if a.cen else None
-            build(a.A, a.B, a.every, cen); print(time.strftime("%H:%M:%S"), "dashboard.html updated")
+            build(a.A, a.B, a.every, cen, a.dir); print(time.strftime("%H:%M:%S"), "dashboard.html updated")
         except FileNotFoundError:
-            print("waiting for historico.csv / ultimo_snapshot.csv ...")
+            print(f"waiting for historico.csv / ultimo_snapshot.csv in {a.dir} ...")
         except Exception as e:
             print("error:", e)
         if a.once: break

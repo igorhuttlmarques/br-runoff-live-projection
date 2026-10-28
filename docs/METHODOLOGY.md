@@ -31,7 +31,7 @@ Core idea: the R2 result of each municipality is predicted from the R1 result of
 | Step | Script | Input | Output |
 |---|---|---|---|
 | 1. R1 base | `scenario_t1.py` | `dados_tse_2026/munzona_2026.zip` | `cenario_zona.csv`, `cenario_municipio.csv` |
-| 2. Map | `gerar_br_uf_svg.py` | `dados_geo/brazil-states.geojson` | `br_uf_svg.json` |
+| 2. Map | `build_uf_svg.py` | `dados_geo/brazil-states.geojson` | `br_uf_svg.json` |
 | 3. R2 ingestion + model | `projection_r2.py` | `cenario_municipio.csv` + TSE API | `historico.csv`, `ultimo_snapshot.csv` |
 | 4. Dashboard | `dashboard_html.py` | the two CSVs above + `br_uf_svg.json` | `dashboard.html` |
 | Evaluation | `docs/error_by_cycle.py` | `data/election_night_2026-10-25/historico.csv` | `docs/error_by_cycle.md`, `docs/error_by_cycle.png` |
@@ -101,7 +101,7 @@ Regions (`REG`): N, NE, CO, SE, S, and EX (abroad).
 
 ### 4.4 Map and dashboard
 
-- `gerar_br_uf_svg.py` converts `dados_geo/brazil-states.geojson` into SVG paths: equirectangular projection with `cos(-15°)` correction, width 600, simplification 0.04°, drops islands smaller than 0.05 square degrees. Run once.
+- `build_uf_svg.py` converts `dados_geo/brazil-states.geojson` into SVG paths: equirectangular projection with `cos(-15°)` correction, width 600, simplification 0.04°, drops islands smaller than 0.05 square degrees. Run once.
 - `dashboard_html.py` reads `historico.csv` + `ultimo_snapshot.csv` and writes a self-contained `dashboard.html` (Chart.js 4.4.1 via cdnjs), with a `meta refresh` every `--every` (30 s). It ignores `inconsistente` cycles.
 
 ## 5. The model
@@ -202,7 +202,7 @@ Practical consequence: at 99.65% counted the interval is practically degenerate 
 
 Times are from 2026-10-25 (runoff day), local time.
 
-- **17:22 to 17:35**: first version of `projection_r2.py`, ridge WLS logit regression per municipality anchored on R1, with bootstrap by UF. Validated on synthetic data with biased arrival (`test_synthetic.py`).
+- **17:22 to 17:35**: first version of `projection_r2.py`, weighted ridge regression on empirical logits per municipality anchored on R1, with bootstrap by UF. Validated on synthetic data with biased arrival (`test_synthetic.py`).
 - **17:35 to 17:45**: the municipal endpoint `-v.json` returned 404; replaced by `-u.json`, with the schema rewritten (`carg[].agr[].par[].cand[]`). Found that the municipal R2 **has no breakdown by zone**. The TSE publication stayed frozen at 0.25% since ~17:07 (polling stations open until 19:00 in part of the country).
 - **17:48**: HTTP 429 block per IP, caused by the national sweep (5,570 municipalities, 12 connections, aggressive retry). This led to the municipality sample and the 403/429 protection. Also fixed a bug in the R1 cache key (it did not include `--ufs`).
 - **~18:00**: R1 now comes from the Open Data portal (`cdn.tse.jus.br`, no rate limit): `scenario_t1.py` and the transfer scenario (tie theta 0.65).
@@ -371,7 +371,7 @@ pip install -r requirements.txt
 python scenario_t1.py --loss 0.2 --thetas 0.3,0.4,0.5,0.6
 
 # 2) Map (once; needs dados_geo/brazil-states.geojson and shapely)
-python gerar_br_uf_svg.py
+python build_uf_svg.py
 
 # 3) Test without network
 python test_synthetic.py
