@@ -65,3 +65,7 @@ This writes `dashboard.html` (git-ignored) in the current directory; `br_uf_svg.
 ## Fixed identifiers
 
 Some names are data contracts and are intentionally kept in Portuguese: CSV column names (`A1`, `B1`, `O1`, `V1`, `A2`, `B2`, `pst`, `p_hat`, `R`, `Vhat`, `status`, `div_br`, `apurado`, ...), TSE JSON fields, status values (`ok`, `nao_ancorado`, `inconsistente`) and the data file names above. See the glossary in [docs/METHODOLOGY.md](docs/METHODOLOGY.md#13-glossary-and-fixed-identifiers).
+
+## Acknowledgments
+
+This project exists because of Rodrigo Mahlmeister (https://x.com/ro_mahl). His live projection of the 2026 first round, which called the result from 2.2% of counted ballots ([NeoFeed](https://neofeed.com.br/finde/como-um-pesquisador-brasileiro-criou-um-algoritmo-que-simulou-e-acertou-o-resultado-do-1o-turno/)), gave me the idea of building my own model for the runoff, and the core approach follows his: measure each unit's swing against a reference election and apply it to the votes still to be counted, moving from a national rule to regional and state rules as data arrives. The implementation, code and evaluation here are my own; his code is not public. The statistical background is listed in [docs/METHODOLOGY.md](docs/METHODOLOGY.md#references).
