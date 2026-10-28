@@ -1,0 +1,28 @@
+# large raw data (download from the TSE Open Data portal)
+dados_tse_2026/
+dados_geo/
+
+# request cache
+cache/
+
+# run outputs
+dashboard.html
+dashboard.tmp.html
+diag_*.csv
+*.log
+*.err
+logs/
+
+# live projector write path (the recorded election-night copy lives under data/)
+/historico.csv
+/ultimo_snapshot.csv
+
+# recorded election-night data stays tracked
+!data/election_night_2026-10-25/
+!data/election_night_2026-10-25/logs/
+!data/election_night_2026-10-25/logs/watch.log
+
+# python
+__pycache__/
+*.pyc
+.venv/
