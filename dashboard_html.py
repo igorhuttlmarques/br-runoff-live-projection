@@ -80,7 +80,7 @@ new Chart(ts,{type:'line',data:{labels:xs,datasets:[
  {label:'CI low',data:H.map(r=>r.lo),borderWidth:0,pointRadius:0,fill:false},
  {label:'Projection',data:H.map(r=>r.point),borderColor:css('--a'),borderWidth:2.5,pointRadius:2},
  {label:'Count',data:H.map(r=>r.cnt),borderColor:css('--mu'),borderDash:[5,5],borderWidth:1.5,pointRadius:0},
- {label:'50%',data:H.map(()=>.5),borderColor:css('--b'),borderWidth:1,pointRadius:0},
+ {label:'50%',data:H.map(()=>.5),borderColor:css('--mu'),borderDash:[2,4],borderWidth:1,pointRadius:0},
  ...(D.cen?[{label:'R1 scenario high',data:H.map(()=>D.cen[1]),borderColor:'rgba(255,200,80,.6)',borderDash:[2,4],borderWidth:1,pointRadius:0,fill:'+1',backgroundColor:'rgba(255,200,80,.08)'},
  {label:`R1 scenario (${pct(D.cen[0],1)} to ${pct(D.cen[1],1)})`,data:H.map(()=>D.cen[0]),borderColor:'rgba(255,200,80,.6)',borderDash:[2,4],borderWidth:1,pointRadius:0}]:[])]},
  options:{maintainAspectRatio:false,animation:false,plugins:{legend:{labels:{filter:i=>!i.text.startsWith('CI')&&i.text!=='R1 scenario high'}},
