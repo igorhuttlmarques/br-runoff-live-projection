@@ -16,10 +16,11 @@ TPL = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,-apple-system,Segoe UI,sans-serif}
 .wrap{max-width:1280px;margin:0 auto;padding:20px 16px}
 h1{font-size:18px;margin:0 0 4px}.sub{color:var(--mu);font-size:12px;margin-bottom:16px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:14px}
 .k{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:12px 14px}
 .k .l{color:var(--mu);font-size:12px}.k .v{font-size:24px;font-weight:650;margin-top:2px;font-variant-numeric:tabular-nums}
 .k .d{font-size:12px;color:var(--mu)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.duo .n{font-size:12px;margin-top:2px}
 .bar{height:10px;border-radius:5px;overflow:hidden;display:flex;margin:6px 0 14px;background:var(--ln)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
 .c{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:14px;margin-bottom:12px}
@@ -53,10 +54,12 @@ const D=__DATA__, A=D.A, B=D.B, L=D.last;
 const pct=(x,d=2)=>(100*x).toFixed(d)+'%';
 const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 document.getElementById('sub').textContent=`Updated ${L.ts} | units in the fit ${L.n_fit} | UF tau ${(+L.tau).toFixed(3)} | unofficial statistical estimate | UF = federative unit (state)`;
-const k=[['Counted (valid votes)',pct(L.apurado,1),''],[`Count ${A}`,pct(L.cnt),`${B}: ${pct(1-L.cnt)}`],
- [`Projection ${A}`,pct(L.point),D.delta==null?'':`${D.delta>=0?'+':''}${(100*D.delta).toFixed(2)} pp vs previous cycle`],
- ['90% CI',`${pct(L.lo,1)} to ${pct(L.hi,1)}`,''],[`P(${A} wins)`,pct(L.pA,0),`P(${B} wins): ${pct(1-L.pA,0)}`]];
-document.getElementById('kpis').innerHTML=k.map(([l,v,d])=>`<div class="k"><div class="l">${l}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join('');
+const prob=x=>x>0.99?'> 99%':x<0.01?'< 1%':pct(x,0);
+const duo=(l,a,b,d='')=>`<div class="k"><div class="l">${l}</div><div class="duo"><div><div class="n" style="color:var(--a)">${A}</div><div class="v">${a}</div></div><div><div class="n" style="color:var(--b)">${B}</div><div class="v">${b}</div></div></div><div class="d">${d}</div></div>`;
+const one=(l,v)=>`<div class="k"><div class="l">${l}</div><div class="v">${v}</div></div>`;
+document.getElementById('kpis').innerHTML=[one('Counted (valid votes)',pct(L.apurado,1)),duo('Count',pct(L.cnt),pct(1-L.cnt)),
+ duo('Projection',pct(L.point),pct(1-L.point),D.delta==null?'':`${A} ${D.delta>=0?'+':''}${(100*D.delta).toFixed(2)} pp vs previous cycle`),
+ one(`90% CI (${A})`,`${pct(L.lo,1)} to ${pct(L.hi,1)}`),duo('Win probability',prob(L.pA),prob(1-L.pA))].join('');
 document.getElementById('bar').innerHTML=`<div style="width:${100*L.point}%;background:var(--a)"></div><div style="flex:1;background:var(--b)"></div>`;
 (function(){const M=D.map;if(!M){document.getElementById('mapcard').style.display='none';return}
  document.getElementById('lgb').textContent=`blue: ${B} gained ground`;document.getElementById('lga').textContent=`red: ${A} gained ground`;
